@@ -70,7 +70,7 @@ export function VitalsCard() {
 
       await loadVitals();
     } catch (e) {
-      setError("Erreur lors de l'enregistrement.");
+      setError("Erreur lors de l`&apos;`enregistrement.");
     } finally {
       setSaving(false);
     }
@@ -101,7 +101,7 @@ export function VitalsCard() {
         </div>
       ) : (
         <p className="mt-2 text-xs text-slate-500">
-          Aucune mesure pour l'instant. Ajoute-en une ci-dessous.
+          Aucune mesure pour l`&apos;`instant. Ajoute-en une ci-dessous.
         </p>
       )}
 
