@@ -150,7 +150,7 @@ function getWeeklyTemplate(week: number): SessionTemplate[] {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   if (!DEMO_USER_ID) {
     return NextResponse.json(
       { error: "DEMO_USER_ID not configured" },
@@ -234,6 +234,28 @@ export async function POST(req: NextRequest) {
   }
 
   const base = getBaseDate();
+
+  type SessionSeed = {
+    userId: string;
+    programId: string;
+    phaseNumber: number;
+    weekNumber: number;
+    date: Date;
+    type: "CARDIO";
+    modality:
+      | "WALK"
+      | "TREADMILL"
+      | "BIKE"
+      | "POOL_WALK"
+      | "POOL_SWIM"
+      | "AQUABIKE"
+      | "RUN";
+    plannedDurationMin: number;
+    intensityHint?: string;
+  };
+
+const allSessionsData: SessionSeed[] = [];
+
 
   const allSessionsData: any[] = [];
 

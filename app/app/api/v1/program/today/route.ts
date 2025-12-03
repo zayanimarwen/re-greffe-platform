@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 const DEMO_USER_ID = process.env.DEMO_USER_ID || "";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   if (!DEMO_USER_ID) {
     return NextResponse.json(
       { error: "DEMO_USER_ID not configured" },

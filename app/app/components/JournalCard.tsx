@@ -62,8 +62,8 @@ export function JournalCard() {
 
       if (!res.ok) throw new Error("Erreur sauvegarde journal");
       await loadJournal();
-    } catch (e) {
-      setError("Erreur lors de l'enregistrement du ressenti.");
+    } catch (_e) {
+      setError("Erreur lors de l&apos;enregistrement du ressenti.");
     } finally {
       setSaving(false);
     }
