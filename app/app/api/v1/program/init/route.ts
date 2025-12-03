@@ -254,10 +254,7 @@ export async function POST(_req: NextRequest) {
     intensityHint?: string;
   };
 
-const allSessionsData: SessionSeed[] = [];
-
-
-  const allSessionsData: any[] = [];
+  const allSessionsData: SessionSeed[] = [];
 
   for (let week = 1; week <= 12; week++) {
     const weeklyTemplate = getWeeklyTemplate(week);
