@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/* ========= ENUMS ========= */
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum SessionType {
+  CARDIO
+  STRENGTH
+  MOBILITY
+  POOL
+}
+
+enum ModalityType {
+  WALK
+  TREADMILL
+  BIKE
+  POOL_WALK
+  POOL_SWIM
+  AQUABIKE
+  RUN
+}
+
+enum EffortFeeling {
+  TOO_EASY
+  OK
+  TOO_HARD
+}
+
+enum VitalSource {
+  MANUAL
+  DEVICE
+}
+
+enum AlertType {
+  HIGH_BP
+  LOW_BP
+  FAST_WEIGHT_GAIN
+  LOW_ACTIVITY
+}
+
+/* ========= MODELS ========= */
+
+model User {
+  id             String           @id @default(uuid())
+  email          String           @unique
+  passwordHash   String
+  role           Role             @default(PATIENT)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  medicalProfile MedicalProfile?
+  goals          Goal[]
+  sessions       Session[]
+  vitals         Vital[]
+  journalEntries JournalEntry[]
+  nutritionLogs  NutritionLog[]
+  alerts         Alert[]
+}
+
+model MedicalProfile {
+  id              String   @id @default(uuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String   @unique
+  transplantType  String   @default("HEART")
+  transplantDate  DateTime
+  centerName      String?
+  hasHypertension Boolean  @default(false)
+  hasDiabetes     Boolean  @default(false)
+  hasKidneyDisease Boolean @default(false)
+  heightCm        Int?
+  weightKg        Float?
+  currentPhase    Int      @default(1)   // 1..4
+  currentWeek     Int      @default(1)   // 1..12
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Goal {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  label      String
+  priority   Int      @default(1)
+  createdAt  DateTime @default(now())
+}
+
+/* ===== PROGRAMME & ACTIVITÉ ===== */
+
+model Program {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  totalWeeks  Int
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  phases      Phase[]
+  sessions    Session[]
+}
+
+model Phase {
+  id           String   @id @default(uuid())
+  program      Program  @relation(fields: [programId], references: [id])
+  programId    String
+  phaseNumber  Int
+  label        String
+  startWeek    Int
+  endWeek      Int
+
+  @@unique([programId, phaseNumber])
+}
+
+model Session {
+  id                 String        @id @default(uuid())
+  user               User          @relation(fields: [userId], references: [id])
+  userId             String
+  program            Program       @relation(fields: [programId], references: [id])
+  programId          String
+  phaseNumber        Int
+  weekNumber         Int
+  date               DateTime
+  type               SessionType
+  modality           ModalityType
+  plannedDurationMin Int
+  intensityHint      String?
+  createdAt          DateTime      @default(now())
+
+  log                SessionLog?
+
+  @@unique([userId, date])
+}
+
+model SessionLog {
+  id                String         @id @default(uuid())
+  session           Session        @relation(fields: [sessionId], references: [id])
+  sessionId         String         @unique
+  completedStatus   String         // "DONE" | "PARTIAL" | "MISSED"
+  actualDurationMin Int?
+  perceivedEffort   EffortFeeling?
+  comment           String?
+  createdAt         DateTime       @default(now())
+}
+
+/* ===== SUIVI SANTÉ ===== */
+
+model Vital {
+  id         String       @id @default(uuid())
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String
+  measuredAt DateTime
+  systolic   Int?
+  diastolic  Int?
+  heartRate  Int?
+  weightKg   Float?
+  source     VitalSource  @default(MANUAL)
+  createdAt  DateTime     @default(now())
+}
+
+/* ===== JOURNAL / RESSENTI ===== */
+
+model JournalEntry {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  date         DateTime
+  mood         Int?
+  fatigue      Int?
+  sleepQuality Int?
+  symptoms     Json?
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model NutritionLog {
+  id            String   @id @default(uuid())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  date          DateTime
+  qualityRating Int?
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+/* ===== ALERTES ===== */
+
+model Alert {
+  id         String    @id @default(uuid())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String
+  type       AlertType
+  occurredAt DateTime  @default(now())
+  payload    Json?
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+ 
